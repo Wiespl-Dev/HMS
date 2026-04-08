@@ -1,0 +1,2682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WIESPL - Hospital Management System</title>
+    <link rel="icon" type="image/png" href="assets/logo.png">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Additional styles for multi-step form */
+        .form-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .step {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            position: relative;
+            cursor: pointer;
+            min-width: 120px;
+        }
+        
+        .step:not(:last-child):after {
+            content: '→';
+            position: absolute;
+            right: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #ccc;
+            font-size: 20px;
+        }
+        
+        .step.active {
+            color: #007bff;
+            font-weight: bold;
+        }
+        
+        .step.active .step-number {
+            background: #007bff;
+            color: white;
+        }
+        
+        .step.completed {
+            color: #28a745;
+        }
+        
+        .step.completed .step-number {
+            background: #28a745;
+            color: white;
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: #e9ecef;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 8px;
+        }
+        
+        .form-step {
+            display: none;
+        }
+        
+        .form-step.active {
+            display: block;
+        }
+        
+        .form-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+        }
+        
+        .form-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .section-header {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #007bff;
+        }
+        
+        .section-header h4 {
+            margin: 0;
+            color: #007bff;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #495057;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .form-control:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .btn-lg {
+            padding: 12px 24px;
+            font-size: 16px;
+        }
+        
+        .biometry-section {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+        
+        .biometry-title {
+            color: #007bff;
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .file-upload-section {
+            border: 2px dashed #007bff;
+            padding: 30px;
+            text-align: center;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+        
+        .file-upload-area {
+            cursor: pointer;
+            padding: 20px;
+        }
+        
+        .uploaded-files {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+        }
+        
+        .empty-upload-state {
+            text-align: center;
+            color: #6c757d;
+            padding: 20px;
+        }
+        
+        .progress-indicator {
+            margin-bottom: 30px;
+        }
+        
+        .step-label {
+            font-size: 12px;
+            display: block;
+            margin-top: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .form-steps {
+                flex-direction: column;
+            }
+            
+            .step:not(:last-child):after {
+                content: '↓';
+                right: 50%;
+                top: auto;
+                bottom: -15px;
+                transform: translateX(50%);
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- Login Page -->
+    <div id="login-page">
+        <div class="login-container">
+            <div class="login-left">
+                <div class="login-logo">
+                    <div class="icon icon-hospital"></div>
+                </div>
+                <h1>WIESPL HMS</h1>
+                <p>Advanced Hospital Management System</p>
+            </div>
+            <div class="login-right">
+                <h2>Welcome Back</h2>
+                <p>Please log in to continue</p>
+                <form id="login-form">
+                    <div id="login-error">Invalid username or password</div>
+                    <div class="form-group">
+                        <label for="login-username">Username</label>
+                        <input type="text" id="login-username" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <div class="icon icon-key"></div> Login
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="icon icon-hospital"></div>
+                </div>
+                <h2>WIESPL</h2>
+                <p>Hospital Management</p>
+            </div>
+            <div class="sidebar-menu">
+                <ul>
+                    <li><a class="active" data-page="dashboard" data-permission="dashboard_view">
+                        <div class="icon icon-chart"></div>
+                        <span class="menu-text">Dashboard</span>
+                    </a></li>
+                    <li><a data-page="patients" data-permission="patient_add">
+                        <div class="icon icon-user-injured"></div>
+                        <span class="menu-text">Add Patient</span>
+                    </a></li>
+                    <li>
+                        <a data-page="ot-scheduling" data-permission="ot_schedule">
+                            <div class="icon icon-shedule"></div>
+                            <span class="menu-text">OT Scheduling</span>
+                        </a>
+                    </li>
+                    <li><a data-page="patient-list" data-permission="patient_view">
+                        <div class="icon icon-clipboard"></div>
+                        <span class="menu-text">Patient List</span>
+                    </a></li>
+                    <li>
+                        <a data-page="store" data-permission="store_view">
+                            <div class="icon icon-store"></div>
+                            <span class="menu-text">Store Management</span>
+                            <span class="notification-badge" id="store-notification-badge">0</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a data-page="music" data-permission="music_manage">
+                            <div class="icon icon-music"></div>
+                            <span class="menu-text">OT Music</span>
+                        </a>
+                    </li>
+                    <li><a data-page="master" data-permission="master_manage">
+                        <div class="icon icon-database"></div>
+                        <span class="menu-text">Master Data</span>
+                    </a></li>
+                    <li><a data-page="roles" data-permission="role_manage">
+                        <div class="icon icon-shield"></div>
+                        <span class="menu-text">Manage Roles</span>
+                    </a></li>
+                    <li><a data-page="users" data-permission="user_manage">
+                        <div class="icon icon-people"></div>
+                        <span class="menu-text">Manage Users</span>
+                    </a></li>
+                    <li>
+                        <a data-page="clean-report" data-permission="report_manage">
+                            <div class="icon icon-broom"></div>
+                            <span class="menu-text">Clean Report</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" data-page="videos" data-permission="video_manage">
+                            <div class="icon icon-video"></div>
+                            <span class="menu-text">OT Videos</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+       
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <div class="header-left">
+                    <button id="sidebar-toggle" title="Toggle Sidebar">
+                        <div class="icon icon-menu"></div>
+                    </button>
+                    <h1 id="page-title">Dashboard</h1>
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar" id="user-avatar">U</div>
+                    <span id="user-name-display">Not Logged In</span>
+                    <button id="logout-btn" title="Logout">
+                        <div class="icon icon-door"></div> Logout
+                    </button>
+                </div>
+            </div>
+           
+            <!-- Dashboard Page -->
+            <div id="dashboard" class="page active">
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <div class="stat-icon patients">
+                            <div class="icon icon-user-injured"></div>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="total-patients">0</h3>
+                            <p>Total Patients</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon store">
+                            <div class="icon icon-store"></div>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="total-items">0</h3>
+                            <p>Store Items</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon roles">
+                            <div class="icon icon-shield"></div>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="total-roles">0</h3>
+                            <p>User Roles</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon master">
+                            <div class="icon icon-cogs"></div>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="total-master">0</h3>
+                            <p>Master Parameters</p>
+                        </div>
+                    </div>
+                </div>
+               
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Recent Activities</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Time</th>
+                                        <th>User</th>
+                                        <th>Activity</th>
+                                        <th>Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="activities-tbody">
+                                    <tr>
+                                        <td colspan="4" style="text-align: center;">No recent activities</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+    <!-- COMPLETE 5-STEP OPHTHALMOLOGY EMR FORM -->
+            <div id="patients" class="page">
+                <div id="patient-success" class="success-message">Patient record saved successfully!</div>
+                <div id="patient-error" class="error-message" style="display:none;background:#fef2f2;border:1px solid #fca5a5;color:#b91c1c;padding:12px 16px;border-radius:6px;margin-bottom:14px;font-weight:500;"></div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3><div class="icon icon-user-injured"></div> Complete Ophthalmology Patient Record</h3>
+                        <p style="color: var(--primary);">Matching Hospital Paper Checklist 100%</p>
+                    </div>
+                    <div class="card-body">
+                        <!-- Progress Indicator -->
+                        <div class="form-steps progress-indicator">
+                            <div class="step active" data-step="1">
+                                <span class="step-number">1</span>
+                                <span class="step-label">Basic Info & History</span>
+                            </div>
+                            <div class="step" data-step="2">
+                                <span class="step-number">2</span>
+                                <span class="step-label">Lab Tests</span>
+                            </div>
+                            <div class="step" data-step="3">
+                                <span class="step-number">3</span>
+                                <span class="step-label">Eye Exam & Investigations</span>
+                            </div>
+                            <div class="step" data-step="4">
+                                <span class="step-number">4</span>
+                                <span class="step-label">Biometry & Surgical Aids</span>
+                            </div>
+                            <div class="step" data-step="5">
+                                <span class="step-number">5</span>
+                                <span class="step-label">Verification & Notes</span>
+                            </div>
+                        </div>
+
+                        <form id="patient-form" enctype="multipart/form-data">
+                            <!-- STEP 1: Basic Patient Information & Medical History (Matches Photo 1) -->
+                            <div id="step-1" class="form-step active">
+                                <!-- Section: Basic Information (Top of Form) -->
+                                <div class="form-section">
+                                    <div class="section-header">
+                                        <h4><div class="icon icon-id-card"></div> Patient Identification</h4>
+                                    </div>
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label>Patient Name <span class="required">*</span></label>
+                                            <input type="text" id="patient-name" class="form-control" required placeholder="Full name">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>MRD Number <span class="required">*</span></label>
+                                            <input type="text" id="patient-mrd" class="form-control" required placeholder="MRD-YYYY-XXX">
+                                            <div id="mrd-status" style="margin-top:4px;font-size:13px;min-height:18px;"></div>
+                                            <div id="mrd-existing-surgery" style="display:none;margin-top:6px;">
+                                                <button type="button" class="btn btn-warning" style="font-size:12px;padding:6px 12px;" onclick="loadPatientForNewSurgery()">
+                                                    ⚠️ MRD exists — Click to Add New Surgery for this Patient
+                                                </button>
+                                            </div>
+                                        </div>
+                                
+ <div class="form-group">
+    <label>Physician</label>
+    <select id="physician" class="form-control">
+        <option value="">Select Physician</option>
+    </select>
+</div>
+                                   
+                                        <div class="form-group">
+                                            <label>Age</label>
+                                            <input type="number" id="patient-age" class="form-control" placeholder="Years" min="0" max="120">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Gender</label>
+                                            <select id="patient-gender" class="form-control">
+                                                <option value="">Select</option>
+                                                <option value="Male">Male</option>
+                                                <option value="Female">Female</option>
+                                                <option value="Other">Other</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Phone Number</label>
+                                            <input type="tel" id="patient-phone" class="form-control" placeholder="10-digit mobile">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Email</label>
+                                            <input type="email" id="patient-email" class="form-control" placeholder="patient@example.com">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Blood Group</label>
+                                            <select id="patient-blood-group" class="form-control">
+                                                <option value="">Select</option>
+                                                <option value="A+">A+</option>
+                                                <option value="A-">A-</option>
+                                                <option value="B+">B+</option>
+                                                <option value="B-">B-</option>
+                                                <option value="AB+">AB+</option>
+                                                <option value="AB-">AB-</option>
+                                                <option value="O+">O+</option>
+                                                <option value="O-">O-</option>
+                                                <option value="Unknown">Unknown</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Eye for Operation <span class="required">*</span></label>
+                                            <select id="operation-eye" class="form-control">
+                                                <option value="">Select Eye</option>
+                                                <option value="Right Eye">Right Eye</option>
+                                                <option value="Left Eye">Left Eye</option>
+                                                <option value="Both Eye">Both Eye</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Eye Condition</label>
+                                            <input type="text" id="eye-condition" class="form-control" placeholder="e.g. Cataract, Glaucoma, Retinal Detachment">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Previous Eye Surgery</label>
+                                            <input type="text" id="eye-surgery" class="form-control" placeholder="e.g. Phaco RE, None">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Section: Medical History (Matches Photo 1) -->
+                                <div class="form-section">
+                                    <div class="section-header">
+                                        <h4><div class="icon icon-notes-medical"></div> Medical History</h4>
+                                    </div>
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label>Diabetic</label>
+                                            <select id="diabetic" class="form-control" onchange="toggleDiabeticFields(this.value)">
+                                                <option value="No">No</option>
+                                                <option value="Yes">Yes</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group" id="diabetic-since-group" style="display: none;">
+                                            <label>Diabetic Since (Years)</label>
+                                            <input type="number" id="diabetic-since" class="form-control" placeholder="Number of years" step="0.5">
+                                        </div>
+                                        <div class="form-group" id="insulin-group" style="display: none;">
+                                            <label>On Insulin</label>
+                                            <select id="insulin" class="form-control">
+                                                <option value="No">No</option>
+                                                <option value="Yes">Yes</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Cardiac History</label>
+                                            <select id="cardiac" class="form-control">
+                                                <option value="No">No</option>
+                                                <option value="Yes">Yes</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Angioplasty</label>
+                                            <select id="angioplasty" class="form-control">
+                                                <option value="No">No</option>
+                                                <option value="Yes">Yes</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Bypass Surgery</label>
+                                            <select id="bypass" class="form-control">
+                                                <option value="No">No</option>
+                                                <option value="Yes">Yes</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Blood Thinner</label>
+                                            <select id="blood-thinner" class="form-control">
+                                                <option value="None">None</option>
+                                                <option value="Ecosprin">Ecosprin</option>
+                                                <option value="Clopidogrel">Clopidogrel</option>
+                                                <option value="Warfarin">Warfarin</option>
+                                                <option value="Heparin">Heparin</option>
+                                                <option value="Other">Other</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Kidney Disease</label>
+                                            <select id="kidney" class="form-control">
+                                                <option value="No">No</option>
+                                                <option value="Yes">Yes</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>On Dialysis</label>
+                                            <select id="dialysis" class="form-control">
+                                                <option value="No">No</option>
+                                                <option value="Yes">Yes</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Hypertension</label>
+                                            <select id="hypertension" class="form-control">
+                                                <option value="No">No</option>
+                                                <option value="Yes">Yes</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Thyroid Disorder</label>
+                                            <select id="thyroid" class="form-control">
+                                                <option value="No">No</option>
+                                                <option value="Yes">Yes</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Asthma/COPD</label>
+                                            <select id="asthma" class="form-control">
+                                                <option value="No">No</option>
+                                                <option value="Yes">Yes</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Section: Address & Emergency -->
+                                <div class="form-section">
+                                    <div class="section-header">
+                                        <h4><div class="icon icon-address-card"></div> Address & Emergency Contact</h4>
+                                    </div>
+                                    <div class="form-grid">
+                                        <div class="form-group form-grid-full">
+                                            <label>Address</label>
+                                            <textarea id="patient-address" class="form-control" rows="2" placeholder="Full address"></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Emergency Contact Name</label>
+                                            <input type="text" id="emergency-name" class="form-control" placeholder="Full name">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Emergency Contact Phone</label>
+                                            <input type="tel" id="emergency-phone" class="form-control" placeholder="Phone number">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Relationship</label>
+                                            <input type="text" id="emergency-relation" class="form-control" placeholder="e.g., Spouse, Child">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Section: Insurance -->
+                                <div class="form-section">
+                                    <div class="section-header">
+                                        <h4><div class="icon icon-shield-alt"></div> Insurance Information</h4>
+                                    </div>
+                                    <div class="form-grid">
+                                     <div class="form-group">
+    <label>Patient Category <span class="required">*</span></label>
+    <select id="patient-category" class="form-control" required>
+        <option value="">Select Category</option>
+        <option value="General">General</option>
+        <option value="Insurance">Insurance</option>
+        <option value="Government Scheme">Government Scheme</option>
+        <option value="No Insurance">No Insurance</option>
+    </select>
+</div>
+                                        <div class="form-group">
+                                            <label>Insurance Provider</label>
+                                            <input type="text" id="insurance-provider" class="form-control" placeholder="e.g. Star Health, ICICI Lombard">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Insurance ID</label>
+                                            <input type="text" id="insurance-id" class="form-control" placeholder="Policy number">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Navigation -->
+                                <div class="form-navigation">
+                                    <div></div>
+                                    <button type="button" class="btn btn-primary next-step" data-next="2">
+                                        Next: Lab Tests <div class="icon icon-arrow-right"></div>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- STEP 2: Lab Tests (Blood, Urine, Infective Profile - Matches Photo 1) -->
+                            <div id="step-2" class="form-step">
+
+                                <!-- Section: Lab Information -->
+                                <div class="form-section">
+                                    <div class="section-header">
+                                        <h4><div class="icon icon-flask"></div> Lab Information & Swab Tests</h4>
+                                    </div>
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label>Lab Name</label>
+                                            <input type="text" id="lab-name-step2" class="form-control" placeholder="Referring lab name">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Date of Investigation</label>
+                                            <input type="date" id="investigation-date-step2" class="form-control">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Lab Registration No.</label>
+                                            <input type="text" id="lab-registration" class="form-control" placeholder="Lab registration number">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>IOL Category</label>
+                                            <input type="text" id="iol-category-lab" class="form-control" placeholder="e.g., Monofocal, Toric, Multifocal">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Gram Swab</label>
+                                            <select id="gram-swab" class="form-control">
+                                                <option value="Not Done">Not Done</option>
+                                                <option value="Normal">Normal</option>
+                     
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Conjunctival Swab</label>
+                                            <select id="conjunctival-swab" class="form-control">
+                                                <option value="Not Done">Not Done</option>
+                                                <option value="Normal">Normal</option>
+                                    
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Section: Blood Tests -->
+                                <div class="form-section">
+                                    <div class="section-header">
+                                        <h4><div class="icon icon-blood"></div> Blood Investigation</h4>
+                                    </div>
+                                    
+                                    <div class="test-grid">
+                                        <div class="test-category">
+                                            <h5>Complete Blood Count</h5>
+                                            <div class="test-item">
+                                                <label>Hemoglobin (g/dL)</label>
+                                                <input type="text" id="hb" class="form-control" placeholder="e.g., 13.5">
+                                            </div>
+                                            <div class="test-item">
+                                                <label>ESR (mm/hr)</label>
+                                                <input type="text" id="esr" class="form-control" placeholder="e.g., 10">
+                                            </div>
+                                            <div class="test-item">
+                                                <label>CRP (mg/L)</label>
+                                                <input type="text" id="crp" class="form-control" placeholder="e.g., 3">
+                                            </div>
+                                            <div class="test-item">
+                                                <label>Platelet Count (×10³/µL)</label>
+                                                <input type="text" id="platelet" class="form-control" placeholder="e.g., 250">
+                                            </div>
+                                            <div class="test-item">
+                                                <label>TLC (×10³/µL)</label>
+                                                <input type="text" id="tlc" class="form-control" placeholder="e.g., 7.5">
+                                            </div>
+                                        </div>
+
+                                        <div class="test-category">
+                                            <h5>Differential Count</h5>
+                                            <div class="test-item">
+                                                <label>Neutrophil (%)</label>
+                                                <input type="text" id="neutrophil" class="form-control" placeholder="e.g., 60">
+                                            </div>
+                                            <div class="test-item">
+                                                <label>Lymphocyte (%)</label>
+                                                <input type="text" id="lymphocyte" class="form-control" placeholder="e.g., 30">
+                                            </div>
+                                            <div class="test-item">
+                                                <label>Eosinophil (%)</label>
+                                                <input type="text" id="eosinophil" class="form-control" placeholder="e.g., 5">
+                                            </div>
+                                            <div class="test-item">
+                                                <label>Monocyte (%)</label>
+                                                <input type="text" id="monocyte" class="form-control" placeholder="e.g., 4">
+                                            </div>
+                                            <div class="test-item">
+                                                <label>Basophil (%)</label>
+                                                <input type="text" id="basophil" class="form-control" placeholder="e.g., 1">
+                                            </div>
+                                        </div>
+
+                                        <div class="test-category">
+                                            <h5>Blood Chemistry</h5>
+                                            <div class="test-item">
+                                                <label>FBS (mg/dL)</label>
+                                                <input type="text" id="fbs" class="form-control" placeholder="Fasting Blood Sugar">
+                                            </div>
+                                            <div class="test-item">
+                                                <label>PPBS (mg/dL)</label>
+                                                <input type="text" id="ppbs" class="form-control" placeholder="Post Prandial">
+                                            </div>
+                                            <div class="test-item">
+                                                <label>RBS (mg/dL)</label>
+                                                <input type="text" id="rbs" class="form-control" placeholder="Random Blood Sugar">
+                                            </div>
+                                            <div class="test-item">
+                                                <label>HbA1C (%)</label>
+                                                <input type="text" id="hba1c" class="form-control" placeholder="e.g., 6.5">
+                                            </div>
+                                            <div class="test-item">
+                                                <label>Creatinine (mg/dL)</label>
+                                                <input type="text" id="creatinine" class="form-control" placeholder="e.g., 0.9">
+                                            </div>
+                                            <div class="test-item">
+                                                <label>Blood Urea Nitrogen (mg/dL)</label>
+                                                <input type="text" id="bun" class="form-control" placeholder="e.g., 15">
+                                            </div>
+                                        </div>
+
+                                        <div class="test-category">
+                                            <h5>Electrolytes</h5>
+                                            <div class="test-item">
+                                                <label>Sodium (mEq/L)</label>
+                                                <input type="text" id="sodium" class="form-control" placeholder="e.g., 140">
+                                            </div>
+                                            <div class="test-item">
+                                                <label>Potassium (mEq/L)</label>
+                                                <input type="text" id="potassium" class="form-control" placeholder="e.g., 4.2">
+                                            </div>
+                                            <div class="test-item">
+                                                <label>Chloride (mEq/L)</label>
+                                                <input type="text" id="chloride" class="form-control" placeholder="e.g., 102">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Section: Urine Tests (Matches Photo 1) -->
+                                <div class="form-section">
+                                    <div class="section-header">
+                                        <h4><div class="icon icon-flask"></div> Urine Examination</h4>
+                                    </div>
+                                    
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label>Urine RE/ME</label>
+                                            <select id="urine-type" class="form-control">
+                                                <option value="RE">RE (Random Examination)</option>
+                                                <option value="ME">ME (Morning Examination)</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Protein</label>
+                                            <select id="urine-protein" class="form-control">
+                                                <option value="Negative">Negative</option>
+                                                <option value="Trace">Trace</option>
+                                                <option value="+">+</option>
+                                                <option value="++">++</option>
+                                                <option value="+++">+++</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Glucose</label>
+                                            <select id="urine-glucose" class="form-control">
+                                                <option value="Negative">Negative</option>
+                                                <option value="+">+</option>
+                                                <option value="++">++</option>
+                                                <option value="+++">+++</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Ketone</label>
+                                            <select id="urine-ketone" class="form-control">
+                                                <option value="Negative">Negative</option>
+                                                <option value="+">+</option>
+                                                <option value="++">++</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Blood</label>
+                                            <select id="urine-blood" class="form-control">
+                                                <option value="Negative">Negative</option>
+                                                <option value="Trace">Trace</option>
+                                                <option value="+">+</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-grid" style="margin-top: 15px;">
+                                        <div class="form-group">
+                                            <label>Pus Cells (/hpf)</label>
+                                            <input type="text" id="urine-pus" class="form-control" placeholder="e.g., 2-4">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Epithelial Cells (/hpf)</label>
+                                            <input type="text" id="urine-epithelial" class="form-control" placeholder="e.g., 1-2">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Bacteria</label>
+                                            <select id="urine-bacteria" class="form-control">
+                                                <option value="None">None</option>
+                                                <option value="Few">Few</option>
+                                                <option value="Moderate">Moderate</option>
+                                                <option value="Many">Many</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Cast</label>
+                                            <input type="text" id="urine-cast" class="form-control" placeholder="Type if present">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Section: Infective Profile (Matches Photo 1) -->
+                                <div class="form-section">
+                                    <div class="section-header">
+                                        <h4><div class="icon icon-virus"></div> Infective Profile (Pre-Surgery Screening)</h4>
+                                    </div>
+                                    
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label>HBsAg (Hepatitis B)</label>
+                                            <select id="hbsag" class="form-control">
+                                                <option value="Not Done">Not Done</option>
+                                                <option value="Negative">Negative</option>
+                                                <option value="Positive">Positive</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Anti-HCV (Hepatitis C)</label>
+                                            <select id="hcv" class="form-control">
+                                                <option value="Not Done">Not Done</option>
+                                                <option value="Negative">Negative</option>
+                                                <option value="Positive">Positive</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>HIV</label>
+                                            <select id="hiv" class="form-control">
+                                                <option value="Not Done">Not Done</option>
+                                                <option value="Negative">Negative</option>
+                                                <option value="Positive">Positive</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>HBV (if applicable)</label>
+                                            <select id="hbv" class="form-control">
+                                                <option value="Not Done">Not Done</option>
+                                                <option value="Negative">Negative</option>
+                                                <option value="Positive">Positive</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Navigation -->
+                                <div class="form-navigation">
+                                    <button type="button" class="btn btn-secondary prev-step" data-prev="1">
+                                        <div class="icon icon-arrow-left"></div> Back: Basic Info
+                                    </button>
+                                    <button type="button" class="btn btn-primary next-step" data-next="3">
+                                        Next: Eye Exam <div class="icon icon-arrow-right"></div>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- STEP 3: Eye Examination & Investigations (Matches Photo 2) -->
+                            <div id="step-3" class="form-step">
+                                <!-- Section: Ocular Examination -->
+                                <div class="form-section">
+                                    <div class="section-header">
+                                        <h4><div class="icon icon-eye"></div> Pre-Operative Eye Assessment</h4>
+                                    </div>
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label>Right Eye Vision Power (UCVA)</label>
+                                            <input type="text" id="vision-re" class="form-control" placeholder="e.g., 6/6, 6/9">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Left Eye Vision Power (UCVA)</label>
+                                            <input type="text" id="vision-le" class="form-control" placeholder="e.g., 6/6, 6/9">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Right Eye BCVA</label>
+                                            <input type="text" id="bcva-re" class="form-control" placeholder="Best corrected">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Left Eye BCVA</label>
+                                            <input type="text" id="bcva-le" class="form-control" placeholder="Best corrected">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Specular Value (RE)</label>
+                                            <input type="text" id="specular-re" class="form-control" placeholder="Cells/mm²">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Specular Value (LE)</label>
+                                            <input type="text" id="specular-le" class="form-control" placeholder="Cells/mm²">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Cataract Type (RE)</label>
+                                            <input type="text" id="cataract-type-re" class="form-control" placeholder="e.g. Immature, Mature, Nuclear, Cortical, PSC">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Cataract Type (LE)</label>
+                                            <input type="text" id="cataract-type-le" class="form-control" placeholder="e.g. Immature, Mature, Nuclear, Cortical, PSC">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Fundus View (RE)</label>
+                                            <input type="text" id="fundus-view-re" class="form-control" placeholder="e.g. Good, Poor, Hazy, Not Possible">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Fundus View (LE)</label>
+                                            <input type="text" id="fundus-view-le" class="form-control" placeholder="e.g. Good, Poor, Hazy, Not Possible">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Pupil Dilation (RE)</label>
+                                            <select id="pupil-dilation-re" class="form-control">
+                                                <option value="Good">Good</option>
+                                                <option value="Adequate">Adequate</option>
+                                                <option value="Poor">Poor</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Pupil Dilation (LE)</label>
+                                            <select id="pupil-dilation-le" class="form-control">
+                                                <option value="Good">Good</option>
+                                                <option value="Adequate">Adequate</option>
+                                                <option value="Poor">Poor</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>IOP (RE) mmHg</label>
+                                            <input type="number" id="iop-re" class="form-control" step="0.1" placeholder="Intraocular pressure">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>IOP (LE) mmHg</label>
+                                            <input type="number" id="iop-le" class="form-control" step="0.1" placeholder="Intraocular pressure">
+                                        </div>
+                                        <div class="form-group form-grid-full">
+                                            <label>Diagnosis</label>
+                                            <textarea id="diagnosis" class="form-control" rows="2" placeholder="Enter clinical diagnosis"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Section: Additional Investigations (OCT, Pentacam, etc.) -->
+                                <div class="form-section">
+                                    <div class="section-header">
+                                        <h4><div class="icon icon-procedure"></div> Special Investigations</h4>
+                                    </div>
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label>OCT</label>
+                                            <select id="oct" class="form-control">
+                                                <option value="Not Done">Not Done</option>
+                                                <option value="Done">Done</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>ARGUS</label>
+                                            <select id="argas" class="form-control">
+                                                <option value="Not Done">Not Done</option>
+                                                <option value="Done">Done</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Pentacam</label>
+                                            <select id="pentacam" class="form-control">
+                                                <option value="Not Done">Not Done</option>
+                                                <option value="Done">Done</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>B-Scan</label>
+                                            <select id="bscan" class="form-control">
+                                                <option value="Not Done">Not Done</option>
+                                                <option value="Done">Done</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Section: Medical Fitness (Matches Photo 2) -->
+                                <div class="form-section">
+                                    <div class="section-header">
+                                        <h4><div class="icon icon-heart"></div> Medical Fitness & Tests</h4>
+                                    </div>
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label>Medical Fitness</label>
+                                            <select id="medical-fitness" class="form-control">
+                                                <option value="Yes">Yes – Fit for Surgery</option>
+                                                <option value="No">No – Not Fit / Requires Clearance</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>ECG</label>
+                                            <select id="ecg" class="form-control">
+                                                <option value="Not Done">Not Done</option>
+                                                <option value="Done">Done</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>BT (Bleeding Time)</label>
+                                            <input type="text" id="bt" class="form-control" placeholder="minutes">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>CT (Clotting Time)</label>
+                                            <input type="text" id="ct" class="form-control" placeholder="minutes">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Navigation -->
+                                <div class="form-navigation">
+                                    <button type="button" class="btn btn-secondary prev-step" data-prev="2">
+                                        <div class="icon icon-arrow-left"></div> Back: Lab Tests
+                                    </button>
+                                    <button type="button" class="btn btn-primary next-step" data-next="4">
+                                        Next: Biometry & Aids <div class="icon icon-arrow-right"></div>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- STEP 4: Biometry & Surgical Aids (Matches Photo 3) -->
+                            <div id="step-4" class="form-step">
+                                <!-- Section: Biometry - Right Eye -->
+                                <div class="form-section">
+                                    <div class="section-header">
+                                        <h4><div class="icon icon-calculator"></div> Biometry - Right Eye</h4>
+                                    </div>
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label>AL (mm)</label>
+                                            <input type="text" id="al-re" class="form-control biometry-field" placeholder="Axial Length">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>K1 (D)</label>
+                                            <input type="text" id="k1-re" class="form-control biometry-field" placeholder="Keratometry 1">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>K2 (D)</label>
+                                            <input type="text" id="k2-re" class="form-control biometry-field" placeholder="Keratometry 2">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>CYL (D)</label>
+                                            <input type="text" id="cyl-re" class="form-control biometry-field" placeholder="Cylinder">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>ACD (mm)</label>
+                                            <input type="text" id="acd-re" class="form-control biometry-field" placeholder="Anterior Chamber Depth">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>LT (mm)</label>
+                                            <input type="text" id="lt-re" class="form-control biometry-field" placeholder="Lens Thickness">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>CCT (μm)</label>
+                                            <input type="text" id="cct-re" class="form-control biometry-field" placeholder="Central Corneal Thickness">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>WTW (mm)</label>
+                                            <input type="text" id="wtw-re" class="form-control biometry-field" placeholder="White to White">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Section: Biometry - Left Eye -->
+                                <div class="form-section">
+                                    <div class="section-header">
+                                        <h4><div class="icon icon-calculator"></div> Biometry - Left Eye</h4>
+                                    </div>
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label>AL (mm)</label>
+                                            <input type="text" id="al-le" class="form-control biometry-field" placeholder="Axial Length">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>K1 (D)</label>
+                                            <input type="text" id="k1-le" class="form-control biometry-field" placeholder="Keratometry 1">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>K2 (D)</label>
+                                            <input type="text" id="k2-le" class="form-control biometry-field" placeholder="Keratometry 2">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>CYL (D)</label>
+                                            <input type="text" id="cyl-le" class="form-control biometry-field" placeholder="Cylinder">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>ACD (mm)</label>
+                                            <input type="text" id="acd-le" class="form-control biometry-field" placeholder="Anterior Chamber Depth">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>LT (mm)</label>
+                                            <input type="text" id="lt-le" class="form-control biometry-field" placeholder="Lens Thickness">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>CCT (μm)</label>
+                                            <input type="text" id="cct-le" class="form-control biometry-field" placeholder="Central Corneal Thickness">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>WTW (mm)</label>
+                                            <input type="text" id="wtw-le" class="form-control biometry-field" placeholder="White to White">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Section: IOL Calculation -->
+                                <div class="form-section">
+                                    <div class="section-header">
+                                        <h4><div class="icon icon-chart-line"></div> IOL Calculation & Planning</h4>
+                                    </div>
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label>A Constant</label>
+                                            <input type="text" id="aconstant" class="form-control" placeholder="A Constant value">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>IOL Power (RE)</label>
+                                            <input type="text" id="iol-power-re" class="form-control" placeholder="Calculated power">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>IOL Power (LE)</label>
+                                            <input type="text" id="iol-power-le" class="form-control" placeholder="Calculated power">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>IOL Category</label>
+                                            <input type="text" id="iol-category" class="form-control" placeholder="e.g., Monofocal, Toric, Multifocal">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>IOL Manufacturer</label>
+                                            <input type="text" id="iol-manufacturer" class="form-control" placeholder="e.g., Alcon, AMO">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Target Refraction (RE)</label>
+                                            <input type="text" id="target-re" class="form-control" placeholder="e.g., Plano">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Target Refraction (LE)</label>
+                                            <input type="text" id="target-le" class="form-control" placeholder="e.g., Plano">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Section: Surgical Aids (NEW - Matches Photo 3) -->
+                                <div class="form-section">
+                                    <div class="section-header">
+                                        <h4><div class="icon icon-syringe"></div> Surgical Aids & Accessories</h4>
+                                    </div>
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label>Viscoat</label>
+                                            <select id="viscoat" class="form-control">
+                                                <option value="No">No</option>
+                                                <option value="Yes">Yes</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>B-Hex Ring</label>
+                                            <select id="bhex-ring" class="form-control">
+                                                <option value="No">No</option>
+                                                <option value="Yes">Yes</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>CTR Ring</label>
+                                            <select id="ctr-ring" class="form-control">
+                                                <option value="No">No</option>
+                                                <option value="Yes">Yes</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>IOL Toric Sheet</label>
+                                            <select id="toric-sheet" class="form-control">
+                                                <option value="No">No</option>
+                                                <option value="Yes">Yes</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group form-grid-full">
+                                            <label>Other Aids / Accessories</label>
+                                            <input type="text" id="other-aids" class="form-control" placeholder="Specify any other aids">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Access Required</label>
+                                            <select id="access-required" class="form-control">
+                                                <option value="Standard">Standard</option>
+                                                <option value="Extended">Extended</option>
+                                                <option value="Emergency">Emergency</option>
+                                                <option value="ICU">ICU</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Section: During Surgery Requirements -->
+                                <div class="form-section">
+                                    <div class="section-header">
+                                        <h4><div class="icon icon-procedure"></div> Intra-Operative Requirements</h4>
+                                    </div>
+                                    <div class="form-grid">
+                                        <div class="form-group form-grid-full">
+                                            <label>Special Requirements</label>
+                                            <textarea id="intraop-requirements" class="form-control" rows="2" 
+                                                      placeholder="Anesthesia type, special instruments, positioning needs"></textarea>
+                                        </div>
+                                   
+                                    </div>
+                                </div>
+
+                                <!-- Navigation -->
+                                <div class="form-navigation">
+                                    <button type="button" class="btn btn-secondary prev-step" data-prev="3">
+                                        <div class="icon icon-arrow-left"></div> Back: Eye Exam
+                                    </button>
+                                    <button type="button" class="btn btn-primary next-step" data-next="5">
+                                        Next: Verification <div class="icon icon-arrow-right"></div>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- STEP 5: Verification, Notes & Reports (Matches Photo 4) -->
+                            <div id="step-5" class="form-step">
+                                <!-- Section: Verification (NEW - Matches Photo 4) -->
+                                <div class="form-section">
+                                    <div class="section-header">
+                                        <h4><div class="icon icon-verified"></div> Verification & Sign-off</h4>
+                                    </div>
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label>Verified By</label>
+                                            <input type="text" id="verified-by" class="form-control" placeholder="Name of verifier">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Verification Date</label>
+                                            <input type="date" id="verification-date" class="form-control" value="<?php echo date('Y-m-d'); ?>">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Verification Time</label>
+                                            <input type="time" id="verification-time" class="form-control" value="<?php echo date('H:i'); ?>">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Signature</label>
+                                            <select id="signature" class="form-control">
+                                                <option value="Pending">Pending</option>
+                                                <option value="Digital">Digital</option>
+                                                <option value="Wet Ink">Wet Ink</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Section: Intra-Operative Notes (NEW - Matches Photo 4) -->
+                                <div class="form-section">
+                                    <div class="section-header">
+                                        <h4><div class="icon icon-notes-medical"></div> Intra-Operative Notes</h4>
+                                    </div>
+                                    <div class="form-group form-grid-full">
+                                        <label>Surgical Procedure Notes</label>
+                                        <textarea id="intraop-notes" class="form-control" rows="4" 
+                                                  placeholder="Detailed notes about the surgery, complications if any, instruments used, etc."></textarea>
+                                    </div>
+                                    <div class="form-group form-grid-full" style="margin-top: 15px;">
+                                        <label>Post-Operative Instructions</label>
+                                        <textarea id="postop-instructions" class="form-control" rows="2" 
+                                                  placeholder="Instructions for patient after surgery"></textarea>
+                                    </div>
+                                </div>
+
+
+                                <!-- Section: Reports Upload -->
+                                <div class="form-section">
+                                    <div class="section-header">
+                                        <h4><div class="icon icon-file-medical"></div> Medical Reports & Documents</h4>
+                                    </div>
+                                    <div class="file-upload-section">
+                                        <p class="upload-description">Upload lab reports, biometry printouts, consent forms, etc.</p>
+                                        <div class="file-upload-area" onclick="document.getElementById('file-input').click()">
+                                            <div class="upload-icon">
+                                                <div class="icon icon-cloud-upload"></div>
+                                            </div>
+                                            <div class="upload-text">
+                                                <p class="upload-title">Click to upload or drag and drop files</p>
+                                                <p class="upload-info">Supports: PDF, JPG, PNG, DOC (Max: 50MB each)</p>
+                                            </div>
+                                        </div>
+                                        <input type="file" id="file-input" class="file-input" multiple 
+                                               accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" 
+                                               onchange="handleFileSelect(event)">
+                                        
+                                        <div class="uploaded-files" id="uploaded-files">
+                                            <div class="empty-upload-state">
+                                                <div class="icon icon-file"></div>
+                                                <p>No files uploaded yet</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Final Navigation -->
+                                <div class="form-navigation">
+                                    <button type="button" class="btn btn-secondary prev-step" data-prev="4">
+                                        <div class="icon icon-arrow-left"></div> Back: Biometry
+                                    </button>
+                                    <div style="display:flex;gap:10px;align-items:center;">
+                                        <button type="submit" class="btn btn-success btn-lg">
+                                            <div class="icon icon-save"></div> Save Complete Patient Record
+                                        </button>
+                                        <button type="button" class="btn btn-primary btn-lg" id="print-patient-btn" onclick="printCurrentPatientForm()" title="Save then print as PDF">
+                                            <div class="icon icon-print"></div> Print / PDF
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+       <!-- OT Scheduling Page -->
+<div id="ot-scheduling" class="page">
+
+<div class="card">
+<div class="card-header">
+<h3><div class="icon icon-calendar-check"></div> OT Scheduling</h3>
+
+<button class="btn btn-primary btn-sm" onclick="showOTScheduleModal()">
+<div class="icon icon-plus"></div> Schedule Surgery
+</button>
+
+</div>
+
+<div class="card-body">
+
+<div class="form-grid" style="margin-bottom:20px;">
+
+<div class="form-group">
+<label>Select Date</label>
+<input type="date" id="ot-date-filter" class="form-control">
+</div>
+
+<div class="form-group">
+<label>Select OT</label>
+<select id="ot-filter" class="form-control">
+<option value="">All OTs</option>
+<option>OT-1</option>
+<option>OT-2</option>
+<option>OT-3</option>
+</select>
+</div>
+
+</div>
+
+<div class="table-responsive">
+
+<table class="table">
+
+<thead>
+<tr>
+<th>Start Time</th>
+<th>Patient</th>
+<th>MRD</th>
+<th>Procedure</th>
+<th>Surgeon</th>
+<th>OT</th>
+<th>Actions</th>
+</tr>
+</thead>
+
+<tbody id="ot-schedule-tbody">
+
+<tr>
+<td colspan="7" style="text-align:center">
+No surgeries scheduled
+</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+</div>
+
+<!-- Unscheduled Patients Panel — inside #ot-scheduling -->
+<div class="card" style="margin-top:20px;">
+    <div class="card-header">
+        <h3><div class="icon icon-user-injured"></div> Patients Not Yet Scheduled</h3>
+        <input type="text" id="unscheduled-search" class="form-control" placeholder="Search by name or MRD…" style="width:240px;" oninput="renderUnscheduledPatients()">
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>MRD</th>
+                        <th>Patient Name</th>
+                        <th>Age / Gender</th>
+                        <th>Eye for Op.</th>
+                        <th>Phone</th>
+                        <th>Eye Condition</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="unscheduled-tbody">
+                    <tr><td colspan="7" style="text-align:center;">Loading…</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</div><!-- end #ot-scheduling -->
+
+            <div id="patient-list" class="page">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Patient List</h3>
+                        <div>
+                            <input type="text" id="patient-search" class="form-control" placeholder="Search patients..." style="width: 250px;">
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>MRD</th>
+                                        <th>Name</th>
+                                        <th>Category</th>
+                                        <th>Age</th>
+                                        <th>Gender</th>
+                                        <th>Eye</th> 
+                                        <th>Phone</th>
+                                        <th>Surgery</th>
+                                        <th>OT</th>
+                                        <th>Op. Date</th>
+                                        <th>Op. Time</th>
+                                        <th>Reports</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="patient-list-tbody">
+                                    <tr>
+                                        <td colspan="13" style="text-align: center;">No patients found</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+           
+            <div id="store" class="page">
+                <div class="tabs">
+                    <div class="tab active" data-tab="inventory" data-permission="store_view">Inventory</div>
+                    <div class="tab" data-tab="orders" data-permission="store_view">Orders</div>
+                </div>
+                <div id="inventory" class="tab-content active">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Current Inventory</h3>
+                            <button class="btn btn-primary btn-sm needs-perm" data-permission="store_manage" onclick="showAddItemModal()">
+                                <div class="icon icon-plus"></div> Add New Item
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Item ID</th>
+                                            <th>Name</th>
+                                            <th>Category</th>
+                                            <th>Quantity</th>
+                                            <th>Min Stock</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="store-tbody">
+                                        <tr>
+                                            <td colspan="7" style="text-align: center;">Loading inventory...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="orders" class="tab-content">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Store Orders</h3>
+                            <button class="btn btn-primary btn-sm needs-perm" data-permission="order_place" onclick="showCreateOrder()">
+                                <div class="icon icon-plus"></div> New Order
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Order ID</th>
+                                            <th>Item Name</th>
+                                            <th>OT/Department</th>
+                                            <th>Quantity</th>
+                                            <th>Urgency</th>
+                                            <th>Status</th>
+                                            <th>Created</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="orders-tbody">
+                                        <tr>
+                                            <td colspan="8" style="text-align: center;">No orders found</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+           
+            <!-- Music Page -->
+            <div id="music" class="page">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>OT Music Library</h3>
+                        <button class="btn btn-primary btn-sm needs-perm" data-permission="music_manage" onclick="showUploadMusicModal()">
+                            <div class="icon icon-plus"></div> Upload Music
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>File</th>
+                                        <th>Size</th>
+                                        <th>Uploaded</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="music-tbody">
+                                    <tr>
+                                        <td colspan="5" style="text-align: center;">No music files found</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+           
+            <div id="master" class="page">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Master Data Management</h3>
+                        <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Manage dynamic dropdown values for patient forms and store categories</p>
+                    </div>
+                    <div class="card-body">
+                        <!-- Patient Categories Master Section -->
+                        <div class="master-section">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <h4><div class="icon icon-id-card"></div> Patient Categories</h4>
+                                <button class="btn btn-primary btn-sm needs-perm" data-permission="master_manage" onclick="addMasterData('patient_category')">
+                                    <div class="icon icon-plus"></div> Add
+                                </button>
+                            </div>
+                            <div class="master-items" id="patient-category-items"></div>
+                        </div>
+                        <div class="master-section">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <h4><div class="icon icon-tint"></div> Blood Groups</h4>
+                                <button class="btn btn-primary btn-sm needs-perm" data-permission="master_manage" onclick="addMasterData('blood_group')">
+                                    <div class="icon icon-plus"></div> Add
+                                </button>
+                            </div>
+                            <div class="master-items" id="blood-group-items"></div>
+                        </div>
+                        <div class="master-section">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <h4><div class="icon icon-venus-mars"></div> Gender Options</h4>
+                                <button class="btn btn-primary btn-sm needs-perm" data-permission="master_manage" onclick="addMasterData('gender')">
+                                    <div class="icon icon-plus"></div> Add
+                                </button>
+                            </div>
+                            <div class="master-items" id="gender-items"></div>
+                        </div>
+                        <div class="master-section">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <h4><div class="icon icon-allergies"></div> Common Allergies</h4>
+                                <button class="btn btn-primary btn-sm needs-perm" data-permission="master_manage" onclick="addMasterData('allergy')">
+                                    <div class="icon icon-plus"></div> Add
+                                </button>
+                            </div>
+                            <div class="master-items" id="allergy-items"></div>
+                        </div>
+                        <div class="master-section">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <h4><div class="icon icon-pills"></div> Common Medications</h4>
+                                <button class="btn btn-primary btn-sm needs-perm" data-permission="master_manage" onclick="addMasterData('medication')">
+                                    <div class="icon icon-plus"></div> Add
+                                </button>
+                            </div>
+                            <div class="master-items" id="medication-items"></div>
+                        </div>
+                        <div class="master-section">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <h4><div class="icon icon-shield-alt"></div> Insurance Providers</h4>
+                                <button class="btn btn-primary btn-sm needs-perm" data-permission="master_manage" onclick="addMasterData('insurance')">
+                                    <div class="icon icon-plus"></div> Add
+                                </button>
+                            </div>
+                            <div class="master-items" id="insurance-items"></div>
+                        </div>
+                        <div class="master-section">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <h4><div class="icon icon-boxes"></div> Store Categories</h4>
+                                <button class="btn btn-primary btn-sm needs-perm" data-permission="master_manage" onclick="addMasterData('category')">
+                                    <div class="icon icon-plus"></div> Add
+                                </button>
+                            </div>
+                            <div class="master-items" id="category-items"></div>
+                        </div>
+                        <div class="master-section">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <h4><div class="icon icon-user-md"></div> Doctor Names</h4>
+                                <button class="btn btn-primary btn-sm needs-perm" data-permission="master_manage" onclick="addMasterData('doctor')">
+                                    <div class="icon icon-plus"></div> Add
+                                </button>
+                            </div>
+                            <div class="master-items" id="doctor-items"></div>
+                        </div>
+                        <div class="master-section">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <h4><div class="icon icon-stethoscope"></div> Doctor Roles</h4>
+                                <button class="btn btn-primary btn-sm needs-perm" data-permission="master_manage" onclick="addMasterData('doctor_role')">
+                                    <div class="icon icon-plus"></div> Add
+                                </button>
+                            </div>
+                            <div class="master-items" id="doctor-role-items"></div>
+                        </div>
+                        <div class="master-section">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h4><div class="icon icon-user-md"></div> Physicians</h4>
+        <button class="btn btn-primary btn-sm needs-perm" data-permission="master_manage" onclick="addMasterData('physician')">
+            <div class="icon icon-plus"></div> Add
+        </button>
+    </div>
+    <div class="master-items" id="physician-items"></div>
+</div>
+                        <div class="master-section">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <h4><div class="icon icon-hospital-alt"></div> OT Names</h4>
+                                <button class="btn btn-primary btn-sm needs-perm" data-permission="master_manage" onclick="addMasterData('ot_name')">
+                                    <div class="icon icon-plus"></div> Add
+                                </button>
+                            </div>
+                            <div class="master-items" id="ot-name-items"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Clean Report Page -->
+            <div id="clean-report" class="page">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Clean Report Generation</h3>
+                        <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Create clean reports with photos and generate PDF</p>
+                    </div>
+                    <div class="card-body">
+                        <div id="clean-report-success" class="success-message"></div>
+                        <form id="clean-report-form" enctype="multipart/form-data">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="report-ot">Operation Theater *</label>
+                                    <select id="report-ot" class="form-control" required>
+                                        <option value="">Select OT</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="report-date">Report Date *</label>
+                                    <input type="date" id="report-date" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="report-time">Report Time *</label>
+                                    <input type="time" id="report-time" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="report-verified-by">Verified By *</label>
+                                    <input type="text" id="report-verified-by" class="form-control" required placeholder="Enter verifier name">
+                                </div>
+                                <div class="form-group form-grid-full">
+                                    <label for="report-notes">Notes & Observations</label>
+                                    <textarea id="report-notes" class="form-control" rows="3" placeholder="Enter any observations or additional notes"></textarea>
+                                </div>
+                                
+                                <!-- Photo Upload Section -->
+                                <div class="form-group form-grid-full">
+                                    <div class="reports-section">
+                                        <h4><div class="icon icon-camera"></div> Clean Report Photos</h4>
+                                        <p style="margin-bottom: 15px; color: #666;">Upload photos showing clean conditions (PNG, JPG, JPEG)</p>
+                                       
+                                        <div class="file-upload-area" onclick="document.getElementById('clean-photo-input').click()">
+                                            <div class="icon icon-cloud-upload"></div>
+                                            <p>Click to upload or drag and drop photos here</p>
+                                            <div class="file-types">Supports: PNG, JPG, JPEG (Max: 10MB each)</div>
+                                        </div>
+                                        <input type="file" id="clean-photo-input" class="file-input" multiple accept=".png,.jpg,.jpeg" onchange="handleCleanPhotoSelect(event)">
+                                       
+                                        <div class="uploaded-files" id="clean-photos-preview">
+                                            <p style="color: #888; text-align: center; padding: 20px;">No photos uploaded yet</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Report Status -->
+                                <div class="form-group">
+                                    <label for="report-status">Clean Status *</label>
+                                    <select id="report-status" class="form-control" required>
+                                        <option value="">Select Status</option>
+                                        <option value="excellent">Excellent</option>
+                                        <option value="good">Good</option>
+                                        <option value="satisfactory">Satisfactory</option>
+                                        <option value="needs_improvement">Needs Improvement</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="report-next-check">Next Check Date</label>
+                                    <input type="date" id="report-next-check" class="form-control">
+                                </div>
+                            </div>
+                            
+                            <div class="form-actions" style="margin-top: 20px;">
+                                <button type="button" class="btn btn-secondary" onclick="previewCleanReport()">
+                                    <div class="icon icon-eye"></div> Preview
+                                </button>
+                                <button type="button" class="btn btn-primary" onclick="saveCleanReport()">
+                                    <div class="icon icon-save"></div> Save Report & Download PDF
+                                </button>
+                                <button type="button" class="btn btn-success" onclick="generateCleanReportPDF()" id="generate-pdf-btn" style="display: none;">
+                                    <div class="icon icon-file-pdf"></div> Generate PDF
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Existing Clean Reports -->
+                <div class="card" style="margin-top: 20px;">
+                    <div class="card-header">
+                        <h3>Previous Clean Reports</h3>
+                        <input type="text" id="clean-report-search" class="form-control" placeholder="Search reports..." style="width: 250px;">
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Report ID</th>
+                                        <th>OT Name</th>
+                                        <th>Date</th>
+                                        <th>Time</th>
+                                        <th>Verified By</th>
+                                        <th>Status</th>
+                                        <th>Photos</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="clean-reports-tbody">
+                                    <tr>
+                                        <td colspan="8" style="text-align: center;">No clean reports found</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Videos Page -->
+            <div id="videos" class="page">
+                <div class="page-header">
+                    <div class="page-header-left">
+                        <h2><div class="icon icon-video"></div> OT Video Library</h2>
+                        <p class="page-subtitle">Manage surgical procedure recordings and video archives</p>
+                    </div>
+                    <div class="page-header-right">
+                        <button class="btn btn-primary" onclick="showUploadVideoModal()">
+                            <div class="icon icon-upload"></div> Upload New Video
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon total">
+                            <div class="icon icon-total"></div>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="total-videos">0</h3>
+                            <p>Total Videos</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon storage">
+                            <div class="icon icon-storage"></div>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="total-video-size">0 MB</h3>
+                            <p>Storage Used</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon recent">
+                            <div class="icon icon-calender"></div>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="recent-videos">0</h3>
+                            <p>Last 7 Days</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon ot">
+                            <div class="icon icon-hospital-alt"></div>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="unique-ots">0</h3>
+                            <p>Unique OTs</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search and Filters -->
+                <div class="card filters-card">
+                    <div class="filters-container">
+                        <div class="search-box">
+                            <div class="icon icon-search"></div>
+                            <input type="text" id="video-search" placeholder="Search videos by title, OT, surgeon, or procedure...">
+                        </div>
+                        <div class="filter-options">
+                            <select id="filter-ot" class="filter-select">
+                                <option value="">All OTs</option>
+                            </select>
+                            <select id="filter-surgeon" class="filter-select">
+                                <option value="">All Surgeons</option>
+                            </select>
+                            <button class="btn btn-secondary btn-sm" onclick="resetFilters()">
+                                <div class="icon icon-refresh"></div> Reset
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Videos Grid/Table View -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="view-toggle">
+                            <button class="view-toggle-btn active" data-view="grid" onclick="toggleVideoView('grid')">
+                                <div class="icon icon-grid"></div> Grid
+                            </button>
+                            <button class="view-toggle-btn" data-view="table" onclick="toggleVideoView('table')">
+                                <div class="icon icon-list"></div> List
+                            </button>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-secondary btn-sm" onclick="refreshVideos()">
+                                <div class="icon icon-refresh"></div> Refresh
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Grid View -->
+                    <div class="card-body" id="videos-grid-view">
+                        <div class="videos-grid" id="videos-grid">
+                            <!-- Video cards will be inserted here -->
+                            <div class="empty-state">
+                                <div class="icon icon-video" style="font-size: 48px; color: #bdc3c7;"></div>
+                                <h3>No Videos Found</h3>
+                                <p>Upload your first surgical video to get started</p>
+                                <button class="btn btn-primary" onclick="showUploadVideoModal()">
+                                    <div class="icon icon-upload"></div> Upload Video
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Table View -->
+                    <div class="card-body" id="videos-table-view" style="display: none;">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>OT Name</th>
+                                        <th>Procedure Type</th>
+                                        <th>Surgeon</th>
+                                        <th>Date</th>
+                                        <th>Size</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="videos-tbody">
+                                    <!-- Videos table rows will be inserted here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+           
+            <div id="roles" class="page">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Manage Roles & Permissions</h3>
+                        <button class="btn btn-primary btn-sm needs-perm" data-permission="role_manage" onclick="showCreateRole()">
+                            <div class="icon icon-plus"></div> Create New Role
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Role ID</th>
+                                        <th>Role Name</th>
+                                        <th>Permissions</th>
+                                        <th>Users</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="roles-tbody">
+                                    <tr>
+                                        <td colspan="5" style="text-align: center;">Loading roles...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="users" class="page">
+                <div id="user-success" class="success-message"></div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Create New User</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="user-form">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="user-username">Username *</label>
+                                    <input type="text" id="user-username" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="user-password">Password *</label>
+                                    <input type="password" id="user-password" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="user-role">Assign Role *</label>
+                                    <select id="user-role" class="form-control" required>
+                                        <option value="">Select Role</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="user-fullname">Full Name</label>
+                                    <input type="text" id="user-fullname" class="form-control" placeholder="Enter full name">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success" style="margin-top: 10px;">
+                                <div class="icon icon-plus"></div> Create User
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Existing Users</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>User ID</th>
+                                        <th>Username</th>
+                                        <th>Role</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="users-tbody">
+                                    <tr>
+                                        <td colspan="4" style="text-align: center;">No users found</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="patientModal" class="modal">
+        <div class="modal-content" style="max-width:900px;">
+            <div class="modal-header">
+                <h2><div class="icon icon-user-injured"></div> Patient Full Details</h2>
+                <span class="close" onclick="closeModal('patientModal')">&times;</span>
+            </div>
+            <div class="modal-body" id="patientModalBody">
+            </div>
+            <div class="modal-footer">
+                <button id="patientModalPrintBtn" class="btn btn-primary" onclick="printPatientFromModal()"><div class="icon icon-print"></div> Print / PDF</button>
+                <button class="btn btn-secondary" onclick="closeModal('patientModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="roleModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><div class="icon icon-shield"></div> Create/Edit Role</h2>
+                <span class="close" onclick="closeModal('roleModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="role-form">
+                    <div class="form-group">
+                        <label for="role-name">Role Name *</label>
+                        <input type="text" id="role-name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="role-description">Description</label>
+                        <textarea id="role-description" class="form-control" rows="2"></textarea>
+                    </div>
+                   
+                    <h4 style="margin: 20px 0 15px 0;">Permissions</h4>
+                   
+                    <div class="permission-group">
+                        <h4><div class="icon icon-chart"></div> Dashboard</h4>
+                        <div class="permission-item">
+                            <input type="checkbox" id="perm-dashboard-view" value="dashboard_view">
+                            <label for="perm-dashboard-view">View Dashboard</label>
+                        </div>
+                    </div>
+                    <div class="permission-group">
+                        <h4><div class="icon icon-user-injured"></div> Patient Management</h4>
+                        <div class="permission-item">
+                            <input type="checkbox" id="perm-patient-view" value="patient_view">
+                            <label for="perm-patient-view">View Patients</label>
+                        </div>
+                        <div class="permission-item">
+                            <input type="checkbox" id="perm-patient-add" value="patient_add">
+                            <label for="perm-patient-add">Add Patients</label>
+                        </div>
+                        <div class="permission-item">
+                            <input type="checkbox" id="perm-patient-edit" value="patient_edit">
+                            <label for="perm-patient-edit">Edit Patients</label>
+                        </div>
+                        <div class="permission-item">
+                            <input type="checkbox" id="perm-patient-delete" value="patient_delete">
+                            <label for="perm-patient-delete">Delete Patients</label>
+                        </div>
+                    </div>
+                    <div class="permission-group">
+                        <h4><div class="icon icon-store"></div> Store Management</h4>
+                        <div class="permission-item">
+                            <input type="checkbox" id="perm-store-view" value="store_view">
+                            <label for="perm-store-view">View Inventory & Orders</label>
+                        </div>
+                        <div class="permission-item">
+                            <input type="checkbox" id="perm-store-manage" value="store_manage">
+                            <label for="perm-store-manage">Manage Inventory (Add/Edit/Delete)</label>
+                        </div>
+                        <div class="permission-item">
+                            <input type="checkbox" id="perm-order-place" value="order_place">
+                            <label for="perm-order-place">Place Orders</label>
+                        </div>
+                        <div class="permission-item">
+                            <input type="checkbox" id="perm-order-manage" value="order_manage">
+                            <label for="perm-order-manage">Manage Orders (Dispatch/Complete)</label>
+                        </div>
+                    </div>
+                    <div class="permission-group">
+                        <h4><div class="icon icon-music"></div> Music Management</h4>
+                        <div class="permission-item">
+                            <input type="checkbox" id="perm-music-manage" value="music_manage">
+                            <label for="perm-music-manage">Manage Music Library</label>
+                        </div>
+                    </div>
+                    <div class="permission-group">
+                        <h4><div class="icon icon-database"></div> Master Data</h4>
+                        <div class="permission-item">
+                            <input type="checkbox" id="perm-master-manage" value="master_manage">
+                            <label for="perm-master-manage">Manage Master Data</label>
+                        </div>
+                    </div>
+                    <div class="permission-group">
+                        <h4><div class="icon icon-people"></div> Admin</h4>
+                        <div class="permission-item">
+                            <input type="checkbox" id="perm-role-manage" value="role_manage">
+                            <label for="perm-role-manage">Manage Roles & Permissions</label>
+                        </div>
+                        <div class="permission-item">
+                            <input type="checkbox" id="perm-user-manage" value="user_manage">
+                            <label for="perm-user-manage">Manage Users</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" onclick="saveRole()">
+                    <div class="icon icon-save"></div> Save Role
+                </button>
+                <button class="btn btn-danger" onclick="closeModal('roleModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+<!-- In your OT Scheduling Modal, replace the patient fields with: -->
+<div id="otScheduleModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Schedule Surgery</h3>
+            <span class="close" onclick="closeModal('otScheduleModal')">&times;</span>
+        </div>
+        <div class="modal-body">
+            <form id="ot-schedule-form">
+                <div class="form-grid">
+                    <!-- Patient Search Section -->
+                    <div class="form-group form-grid-full">
+                        <label>Search Patient <span class="required">*</span></label>
+                        <div class="search-container">
+                            <input type="text" 
+                                   id="ot-patient-search" 
+                                   class="form-control" 
+                                   placeholder="Type patient name or MRD number..."
+                                   autocomplete="off">
+                            <div id="patient-search-results" class="search-results"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Selected Patient Info (auto-filled) -->
+                    <div class="form-group">
+                        <label>Patient Name <span class="required">*</span></label>
+                        <input type="text" id="ot-patient-name" class="form-control" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>MRD Number <span class="required">*</span></label>
+                        <input type="text" id="ot-mrd" class="form-control" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Age</label>
+                        <input type="text" id="ot-patient-age" class="form-control" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Gender</label>
+                        <input type="text" id="ot-patient-gender" class="form-control" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input type="text" id="ot-patient-phone" class="form-control" readonly>
+                    </div>
+                    
+                    <!-- Surgery Details -->
+                    <div class="form-group">
+                        <label>Procedure <span class="required">*</span></label>
+                        <input type="text" id="ot-procedure" class="form-control" required placeholder="e.g., Cataract Surgery, Vitrectomy">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Surgeon <span class="required">*</span></label>
+                        <select id="ot-surgeon" class="form-control">
+                            <option value="">Select Surgeon</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>OT <span class="required">*</span></label>
+                        <select id="ot-room" class="form-control">
+                            <option value="">Select OT</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Date <span class="required">*</span></label>
+                        <input type="date" id="ot-date" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Start Time <span class="required">*</span></label>
+                        <input type="time" id="ot-start-time" class="form-control">
+                    </div>
+                    
+                    <div class="form-group form-grid-full">
+                        <label>Notes</label>
+                        <textarea id="ot-notes" class="form-control"></textarea>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-success" onclick="saveOTSchedule()">
+                Save Schedule
+            </button>
+            <button class="btn btn-danger" onclick="closeModal('otScheduleModal')">
+                Cancel
+            </button>
+        </div>
+    </div>
+</div>
+    <div id="orderModal" class="modal">
+        <div class="modal-content modal-sm">
+            <div class="modal-header">
+                <h2><div class="icon icon-shopping-cart"></div> Create New Order</h2>
+                <span class="close" onclick="closeModal('orderModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="order-form">
+                    <div class="form-group">
+                        <label for="order-item">Select Item *</label>
+                        <select id="order-item" class="form-control" required>
+                            <option value="">Select an item</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="order-department">OT/Department *</label>
+                        <input type="text" id="order-department" class="form-control" required placeholder="e.g., OT-1, Emergency, ICU">
+                    </div>
+                    <div class="form-group">
+                        <label for="order-quantity">Quantity *</label>
+                        <input type="number" id="order-quantity" class="form-control" required min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="order-urgency">Urgency *</label>
+                        <select id="order-urgency" class="form-control" required>
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                            <option value="critical">Critical</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" onclick="saveOrder()">
+                    <div class="icon icon-check"></div> Place Order
+                </button>
+                <button class="btn btn-danger" onclick="closeModal('orderModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clean Report Preview Modal -->
+    <div id="cleanReportPreviewModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2><div class="icon icon-file-contract"></div> Clean Report Preview</h2>
+                <span class="close" onclick="closeModal('cleanReportPreviewModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="clean-report-preview-content">
+                    <!-- Preview content will be generated here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="printCleanReport()">
+                    <div class="icon icon-print"></div> Print
+                </button>
+                <button class="btn btn-success" onclick="generateCleanReportPDF()">
+                    <div class="icon icon-download"></div> Download PDF
+                </button>
+                <button class="btn btn-secondary" onclick="closeModal('cleanReportPreviewModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Music Upload Modal -->
+    <div id="musicUploadModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><div class="icon icon-cloud-upload"></div> Upload Music File</h2>
+                <span class="close" onclick="closeModal('musicUploadModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="music-upload-form">
+                    <div class="form-group">
+                        <label for="music-name">Music Name *</label>
+                        <input type="text" id="music-name" class="form-control" required placeholder="Enter music name">
+                    </div>
+                    
+                    <div class="file-upload-area" onclick="document.getElementById('music-file').click()" style="margin: 20px 0;">
+                        <div class="icon icon-cloud-upload"></div>
+                        <p>Click to upload music file</p>
+                        <div class="file-types">Supports: MP3, WAV, OGG, M4A (Max: 100MB)</div>
+                    </div>
+                    <input type="file" id="music-file" class="file-input" accept=".mp3,.wav,.ogg,.m4a,.aac" style="display: none;">
+                    
+                    <div id="selected-file-info" style="display: none; padding: 10px; background: #f8f9fa; border-radius: 5px; margin: 10px 0;">
+                        <strong>Selected File: </strong><span id="file-name"></span>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" onclick="uploadMusicFile()">
+                    <div class="icon icon-upload"></div> Upload
+                </button>
+                <button class="btn btn-danger" onclick="closeModal('musicUploadModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="addItemModal" class="modal">
+        <div class="modal-content modal-sm">
+            <div class="modal-header">
+                <h2><div class="icon icon-plus"></div> Add New Store Item</h2>
+                <span class="close" onclick="closeModal('addItemModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="store-success" class="success-message"></div>
+                <div id="store-error" class="error-message"></div>
+                <form id="item-form">
+                    <div class="form-grid">
+                        <div class="form-group form-grid-full">
+                            <label for="item-name">Item Name *</label>
+                            <input type="text" id="item-name" class="form-control" required>
+                        </div>
+                        <div class="form-group form-grid-full">
+                            <label for="item-category">Category *</label>
+                            <select id="item-category" class="form-control" required>
+                                <option value="">Select Category</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="item-quantity">Quantity *</label>
+                            <input type="number" id="item-quantity" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="item-min-stock">Min Stock *</label>
+                            <input type="number" id="item-min-stock" class="form-control" required>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" onclick="handleAddItem()">
+                    <div class="icon icon-save"></div> Save Item
+                </button>
+                <button type="button" class="btn btn-danger" onclick="closeModal('addItemModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add User Modal -->
+    <div id="userModal" class="modal">
+        <div class="modal-content modal-sm">
+            <div class="modal-header">
+                <h2><div class="icon icon-plus"></div> Create New User</h2>
+                <span class="close" onclick="closeModal('userModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="user-form-modal">
+                    <div class="form-group">
+                        <label for="user-username-modal">Username *</label>
+                        <input type="text" id="user-username-modal" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="user-password-modal">Password *</label>
+                        <input type="password" id="user-password-modal" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="user-role-modal">Assign Role *</label>
+                        <select id="user-role-modal" class="form-control" required>
+                            <option value="">Select Role</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="user-fullname-modal">Full Name</label>
+                        <input type="text" id="user-fullname-modal" class="form-control" placeholder="Enter full name">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" onclick="saveUser()">
+                    <div class="icon icon-save"></div> Create User
+                </button>
+                <button class="btn btn-danger" onclick="closeModal('userModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="filePreviewModal" class="modal">
+        <div class="modal-content" style="max-width: 90%; max-height: 90%;">
+            <div class="modal-header">
+                <h2><div class="icon icon-file"></div> Document Preview</h2>
+                <span class="close" onclick="closeModal('filePreviewModal')">&times;</span>
+            </div>
+            <div class="modal-body" style="text-align: center;">
+                <div id="file-preview-content"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeModal('filePreviewModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Preview Modal -->
+    <div id="videoPreviewModal" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h3 id="video-preview-title"></h3>
+                <span class="close" onclick="closeModal('videoPreviewModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="video-player-container">
+                    <video id="video-player" controls style="width: 100%; max-height: 500px;">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                <div class="video-info" style="margin-top: 20px;">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label><div class="icon icon-hospital-alt"></div> OT:</label>
+                            <span id="video-info-ot"></span>
+                        </div>
+                        <div class="info-item">
+                            <label><div class="icon icon-user-md"></div> Surgeon:</label>
+                            <span id="video-info-surgeon"></span>
+                        </div>
+                        <div class="info-item">
+                            <label><div class="icon icon-calendar"></div> Date:</label>
+                            <span id="video-info-date"></span>
+                        </div>
+                        <div class="info-item">
+                            <label><div class="icon icon-database"></div> Size:</label>
+                            <span id="video-info-size"></span>
+                        </div>
+                    </div>
+                    <div class="info-item full-width">
+                        <label><div class="icon icon-file-alt"></div> Notes:</label>
+                        <p id="video-info-notes" style="margin-top: 5px;"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="downloadCurrentVideo()">
+                    <div class="icon icon-download"></div> Download
+                </button>
+                <button class="btn btn-secondary" onclick="closeModal('videoPreviewModal')">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Upload Modal -->
+    <div id="videoUploadModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3><div class="icon icon-upload"></div> Upload New Video</h3>
+                <span class="close" onclick="closeModal('videoUploadModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="video-upload-form" onsubmit="uploadVideoFile(event); return false;">
+                    <div class="form-group">
+                        <label>Video Title *</label>
+                        <input type="text" id="video-title" placeholder="Enter video title" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Operation Theater (OT) *</label>
+                        <select id="video-ot" required>
+                            <option value="">Select OT</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Procedure Type</label>
+                        <input type="text" id="video-procedure" placeholder="e.g., Cataract Surgery">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Surgeon</label>
+                        <input type="text" id="video-surgeon" placeholder="Surgeon name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Procedure Date</label>
+                        <input type="date" id="video-date">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Video File *</label>
+                        <div class="file-upload-area" style="border: 2px dashed #3498db; padding: 20px; text-align: center; border-radius: 5px; cursor: pointer;"
+                             onclick="document.getElementById('video-file').click()">
+                            <div class="icon icon-upload" style="font-size: 2em; color: #3498db;"></div>
+                            <p>Click to select video file or drag & drop here</p>
+                            
+                            <input type="file" id="video-file" accept="video/*" style="display: none;" 
+                                   onchange="handleVideoFileSelect(this.files)">
+                        </div>
+                        <div id="selected-video-info" style="display: none; margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+                            <strong>Selected File:</strong>
+                            <div id="video-file-name" style="font-weight: bold;"></div>
+                            <div id="video-file-size" style="font-size: 12px; color: #666;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Notes</label>
+                        <textarea id="video-notes" rows="3" placeholder="Any additional notes..."></textarea>
+                    </div>
+                    
+                    <div class="form-group" style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button type="submit" class="btn btn-primary" style="flex: 1;">
+                            <div class="icon icon-upload"></div> Upload Video
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('videoUploadModal')">
+                            Cancel
+                        </button>
+                    </div>
+                    
+                    <div id="video-success" class="success-message"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="script.js"></script>
+    <script>
+        /* toggleBiometryFields – called inline by surgery-type dropdown */
+        function toggleBiometryFields(surgeryType) {
+            const biometryFields = document.querySelectorAll('.biometry-field');
+            const isCataract = surgeryType && surgeryType.includes('Cataract');
+            biometryFields.forEach(field => {
+                field.disabled  = !isCataract;
+                field.style.opacity = isCataract ? '1' : '0.5';
+            });
+        }
+        /* printCleanReport – thin wrapper */
+        function printCleanReport() { window.print(); }
+    </script>
+</body>
+</html>
